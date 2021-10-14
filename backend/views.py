@@ -1,32 +1,29 @@
 from django.http.response import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt # import
-@csrf_exempt  # add this token before defining function
-
-# Create your views here.
-def demo(request):
-
-    if request.method == 'POST':
-        artname = request.POST['artname']
-        email = request.POST['email']
-        trackname = request.POST['trackname']
-        trackurl = request.POST['trackurl']
-        infotext = request.POST['infotext']
-        print('success')
-
-        demoData = Demosubs(a_name = artname, a_email = email, t_name = trackname, t_url = trackurl, t_dis = infotext )
-        demoData.save()
-        return render(request,'demo.html')
-
-    else:    
-        return render(request,'demo.html')
+from django.contrib.auth.hashers import make_password, check_password
 
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
-        name = request.POST['name']
-        print(name)
-        return JsonResponse({'name':name})
+        # print(request.POST)
+        # username = request.POST['username']
+        # firstN = request.POST['first_name']
+        # lastN = request.POST['last_name']
+        # eMail = request.POST['email']
+        # contact = request.POST['contact']
+        # password = make_password(request.POST['password'])
+
+        # userInfo = {
+        #     'User Name' : username,
+        #     'First Name' : firstN,
+        #     'Last Name' : lastN,
+        #     'E-Mail' : eMail,
+        #     'Contact' : contact,
+        #     'Encrypted Password' : password
+        # }
+
+        return JsonResponse(request.POST)
     else:
         print('Error')
         return "Error"
