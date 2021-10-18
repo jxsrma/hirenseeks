@@ -26,6 +26,8 @@ def login(request):
             'Encrypted Password' : password
         }
         print(userInfo)
+        
+        
 
         return JsonResponse(userInfo)
     else:
