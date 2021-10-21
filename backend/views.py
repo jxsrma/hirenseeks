@@ -79,7 +79,7 @@ def login(request):
         jsonData = json.loads(request.body)
         user = authenticate(username = jsonData['userName'],password = jsonData['password'])
         if user is not None:
-            requests.session['user'] = jsonData['userName']
+            request.session['user'] = jsonData['userName']
             return JsonResponse({
             "Success" : True,
             "Error" : "Login Success"
