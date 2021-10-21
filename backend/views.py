@@ -8,7 +8,7 @@ from .models import userData
 from datetime import date
 
 @csrf_exempt
-def login(request):
+def signup(request):
     if request.method == 'POST':
         
         jsonData = json.loads(request.body)
@@ -24,9 +24,19 @@ def login(request):
         # demoData = Demosubs(a_name = artname, a_email = email, t_name = trackname, t_url = trackurl, t_dis = infotext )
         # demoData.save()
         # signUpData = userData()
-        if userData.objects.filter(userName = user_name).exists():
+        if User.objects.filter(username = user_name).exists():
             print("Username Taken")
-        # else:
+            return JsonResponse({
+                "success": False,
+                "error" : "User name Taken"
+            })
+        elif User.objects.filter(email = e_Mail).exists():
+            print("Email already Exist")
+            return JsonResponse({
+                "success": False,
+                "error" : "Email already Exist"
+            })
+        else:
         #     signInData = userData(
         #         userName = user_name,
         #         password = pass_word,
@@ -62,4 +72,7 @@ def login(request):
             return JsonResponse(userInfo)
     else:
         print('Error')
-        return "Error"
+        return JsonResponse({
+                "success": False,
+                "error" : "Unknown error"
+            })
