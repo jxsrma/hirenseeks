@@ -20,7 +20,6 @@ def signup(request):
         e_Mail = jsonData['email']
         dofb = jsonData['dob']
         contact = jsonData['contact']
-        # pass_word = make_password(jsonData['password'])
         pass_word = jsonData['password']
 
         if User.objects.filter(username = user_name).exists():
@@ -45,17 +44,16 @@ def signup(request):
             )
             user.save()
 
-            # signInData = userData(
-            #     userName = user_name,
-            #     password = pass_word,
-            #     firstName = first_N,
-            #     lastName = last_N,
-            #     email = e_Mail,
-            #     dob = dofb,
-            #     contactNumber = contact,
-            #     dateJoined = date.today()
-            #     )
-            # signInData.save();
+            signInData = userData(
+                userName = user_name,
+                firstName = first_N,
+                lastName = last_N,
+                email = e_Mail,
+                dob = dofb,
+                contactNumber = contact,
+                dateJoined = date.today()
+                )
+            signInData.save();
 
             userInfo = {
                 'User Name' : user_name,
