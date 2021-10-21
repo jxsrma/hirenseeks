@@ -4,7 +4,6 @@ from django.db import models
 
 class userData(models.Model):
     userName = models.CharField(max_length=100)
-    password = models.TextField(blank=True)
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     email = models.EmailField(max_length=70)
