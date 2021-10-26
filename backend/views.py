@@ -63,7 +63,8 @@ def signup(request):
                 'E-Mail': e_Mail,
                 'Date of Birth': dofb,
                 'Contact': contact,
-                'Encrypted Password': pass_word
+                'Encrypted Password': pass_word,
+                'Success': True
             }
             print(userInfo)
             print("Data Saved")
@@ -81,49 +82,50 @@ def login(request):
     if request.method == 'POST':
         jsonData = json.loads(request.body)
         if "userName" in jsonData.keys():
-            
+
             user = authenticate(
                 username=jsonData['userName'],
                 password=jsonData['password']
             )
-            
+
             if user is not None:
                 request.session['user'] = jsonData['userName']
                 return JsonResponse({
-                    "Success": True,
-                    "Error": "Login Success",
+                    "success": True,
+                    "error": "Login Success",
                 })
             else:
                 return JsonResponse({
-                    "Success": False,
-                    "Error": "Username or Password Wrong"
+                    "success": False,
+                    "error": "Username or Password Wrong"
                 })
         elif "email" in jsonData.keys():
             try:
-                userInfoByEmail = User.objects.get(email = jsonData['email'])
+                userInfoByEmail = User.objects.get(email=jsonData['email'])
             except:
-                return JsonResponse({"Error": "No User Found"})    
-            
+                return JsonResponse({"Error": "No User Found"})
+
             print(userInfoByEmail.username)
             user = authenticate(
                 username=userInfoByEmail.username,
                 password=jsonData['password']
             )
-            
+
             if user is not None:
                 request.session['user'] = userInfoByEmail.username
                 return JsonResponse({
-                    "Success": True,
-                    "Error": "Login Success",
+                    "success": True,
+                    "error": "Login Success",
                 })
             else:
                 return JsonResponse({
-                    "Success": False,
-                    "Error": "Email or Password Wrong"
+                    "success": False,
+                    "error": "Email or Password Wrong"
                 })
         else:
             try:
-                userInfoByCont = userData.objects.get(contactNumber = jsonData['contactNumber'])
+                userInfoByCont = userData.objects.get(
+                    contactNumber=jsonData['contactNumber'])
             except:
                 return JsonResponse({"Error": "Cont No User Found"})
             user = authenticate(
@@ -132,19 +134,19 @@ def login(request):
             if user is not None:
                 request.session['user'] = userInfoByCont.userName
                 return JsonResponse({
-                    "Success": True,
-                    "Error": "Login Success"
+                    "success": True,
+                    "error": "Login Success"
                 })
             else:
                 return JsonResponse({
-                    "Success": False,
-                    "Error": "Contact Number or Password Wrong"
+                    "success": False,
+                    "error": "Contact Number or Password Wrong"
                 })
 
     else:
         return JsonResponse({
-            "Success": False,
-            "Error": "No Request"
+            "success": False,
+            "error": "No Request"
         })
 
 
@@ -154,9 +156,34 @@ def user(request):
         "User": request.session.get('user')
     })
 
+
 @csrf_exempt
 def logouts(request):
     logout(request)
     return JsonResponse({
         "User": "None"
     })
+
+
+@csrf_exempt
+def userProfile(request, userID):
+    try:
+        print(userID)
+        userInformation = userData.objects.get(userName=userID)
+        return JsonResponse({
+            "success": True,
+            "error": "User found",
+            "Data":{
+                'User Name': userInformation.userName,
+                'First Name': userInformation.firstName,
+                'Last Name': userInformation.lastName,
+                'E-Mail': userInformation.email,
+                'Date of Birth': userInformation.dob,
+                'Contact': userInformation.contactNumber
+            }
+        })
+    except:
+        return JsonResponse({
+            "success": False,
+            "error": "User not found"
+        })
