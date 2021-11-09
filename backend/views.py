@@ -64,7 +64,7 @@ def signup(request):
                 'Date of Birth': dofb,
                 'Contact': contact,
                 'Encrypted Password': pass_word,
-                'Success': True
+                'success': True
             }
             print(userInfo)
             print("Data Saved")
