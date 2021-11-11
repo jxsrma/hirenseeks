@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt  # import
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import User, auth
-from .models import userData
+from .models import postedJob, userData
 from datetime import date
 
 
@@ -76,7 +76,6 @@ def signup(request):
             "error": "Unknown error"
         })
 
-
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -92,7 +91,6 @@ def login(request):
                 request.session['user'] = jsonData['userName']
                 return JsonResponse({
                     "success": True,
-                    "error": "Login Success",
                 })
             else:
                 return JsonResponse({
@@ -115,7 +113,6 @@ def login(request):
                 request.session['user'] = userInfoByEmail.username
                 return JsonResponse({
                     "success": True,
-                    "error": "Login Success",
                 })
             else:
                 return JsonResponse({
@@ -135,7 +132,6 @@ def login(request):
                 request.session['user'] = userInfoByCont.userName
                 return JsonResponse({
                     "success": True,
-                    "error": "Login Success"
                 })
             else:
                 return JsonResponse({
@@ -149,13 +145,11 @@ def login(request):
             "error": "No Request"
         })
 
-
 @csrf_exempt
 def user(request):
     return JsonResponse({
         "User": request.session.get('user')
     })
-
 
 @csrf_exempt
 def logouts(request):
@@ -164,7 +158,6 @@ def logouts(request):
         "User": "None"
     })
 
-
 @csrf_exempt
 def userProfile(request, userID):
     try:
@@ -172,7 +165,7 @@ def userProfile(request, userID):
         userInformation = userData.objects.get(userName=userID)
         return JsonResponse({
             "success": True,
-            "Data":{
+            "Data": {
                 'userName': userInformation.userName,
                 'firstName': userInformation.firstName,
                 'lastName': userInformation.lastName,
@@ -196,3 +189,53 @@ def userProfile(request, userID):
             "success": False,
             "error": "User not found"
         })
+
+@csrf_exempt
+def postJob(request):
+
+    if request.method == 'POST':
+        jobData = json.loads(request.body)
+        job = postedJob(
+            title=jobData['title'],
+            jobPos=jobData['jobPos'],
+            desc=jobData['desc'],
+            timing=jobData['timing'],
+            reqSkill=jobData['reqSkill'],
+            expLevel=jobData['expLevel'],
+            postedBy=request.session.get('user'),
+            location=jobData['location'],
+        )
+        job.save()
+        print(jobData['reqSkill'])
+        return JsonResponse({
+            "success": True,
+            "Data": {
+                "title": jobData['title'],
+                "jobPos": jobData['jobPos'],
+                "desc": jobData['desc'],
+                "timing": jobData['timing'],
+                "reqSkill": jobData['reqSkill'],
+                "expLevel": jobData['expLevel'],
+                "location": jobData['location']
+            }
+        })
+        
+    return JsonResponse({
+        "success": True,
+    })
+
+@csrf_exempt
+def apply(request,jobPostID):
+
+     
+    currUser = request.session.get('user')
+    postedJobData = postedJob.objects.get(id = jobPostID)
+    
+    # applicants = dict(postedJobData.appliedPeople)
+    
+    print(postedJobData.appliedPeople)
+    # print(applicants.ID)
+    
+    userProfileData = userData.objects.get(userName = currUser)
+    print(userProfileData.firstName)
+    return JsonResponse({"ID" : userProfileData.id})
