@@ -172,7 +172,6 @@ def userProfile(request, userID):
         userInformation = userData.objects.get(userName=userID)
         return JsonResponse({
             "success": True,
-            "error": "User found",
             "Data":{
                 'userName': userInformation.userName,
                 'firstName': userInformation.firstName,
@@ -184,14 +183,15 @@ def userProfile(request, userID):
                 'city': userInformation.city,
                 'state': userInformation.state,
                 'bio': userInformation.bio,
-                'skill': userInformation.skill,
+                'skills': userInformation.skills,
                 'projects': userInformation.projects,
                 'linkGithub': userInformation.linkGithub,
                 'linkLinkedIn': userInformation.linkLinkedIn,
                 'linkExtra': userInformation.linkExtra,
             }
         })
-    except:
+    except Exception as e:
+        print(e)
         return JsonResponse({
             "success": False,
             "error": "User not found"
