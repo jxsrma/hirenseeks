@@ -174,12 +174,21 @@ def userProfile(request, userID):
             "success": True,
             "error": "User found",
             "Data":{
-                'User Name': userInformation.userName,
-                'First Name': userInformation.firstName,
-                'Last Name': userInformation.lastName,
-                'E-Mail': userInformation.email,
-                'Date of Birth': userInformation.dob,
-                'Contact': userInformation.contactNumber
+                'userName': userInformation.userName,
+                'firstName': userInformation.firstName,
+                'lastName': userInformation.lastName,
+                'email': userInformation.email,
+                'dob': userInformation.dob,
+                'contactNumber': userInformation.contactNumber,
+                'address': userInformation.address,
+                'city': userInformation.city,
+                'state': userInformation.state,
+                'bio': userInformation.bio,
+                'skill': userInformation.skill,
+                'projects': userInformation.projects,
+                'linkGithub': userInformation.linkGithub,
+                'linkLinkedIn': userInformation.linkLinkedIn,
+                'linkExtra': userInformation.linkExtra,
             }
         })
     except:
