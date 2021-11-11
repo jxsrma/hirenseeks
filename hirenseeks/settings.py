@@ -74,27 +74,31 @@ WSGI_APPLICATION = 'hirenseeks.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'hirenseekers',
-#         'USER': 'root',
-#         'PASSWORD': 'admin',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
+#******************** Jash Sharma ********************
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hireandseeks',
-        'USER': 'manan',
-        'PASSWORD': 'Manan+31',
+        'NAME': 'hirenseekers',
+        'USER': 'root',
+        'PASSWORD': 'admin',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
+
+#******************** Manan Jain ********************
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'hireandseeks',
+#         'USER': 'manan',
+#         'PASSWORD': 'Manan+31',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
