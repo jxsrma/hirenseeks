@@ -6,5 +6,8 @@ urlpatterns = [
     path('login', views.login, name='login'),
     path('user', views.user, name='user'),
     path('logouts', views.logouts, name='logouts'),
-    path('<userID>', views.userProfile, name='userprofile')
+    path('post-for-recruitment', views.postJob,name='recruitment'),
+    path('apply/<jobPostID>', views.apply,name='applyJob'),
+    # path('apply', views.postJob),
+    path('<userID>', views.userProfile, name='userprofile'),
 ]
