@@ -1,57 +1,76 @@
 from django.db import models
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 # Create your models here.
 
-class userData(models.Model):
-    userName = models.CharField(max_length=100)
-    firstName = models.CharField(max_length=50)
-    lastName = models.CharField(max_length=50)
-    email = models.EmailField(max_length=70)
-    countryCode = models.CharField(max_length=5)
-    contactNumber = models.CharField(max_length=10)
-    dob =  models.DateField()
-    address = models.CharField(max_length=100)
-    city = models.CharField(max_length=50)
-    state = models.CharField(max_length=50)
-    country = models.CharField(max_length=50)
-    #profilePic = models.blob
-    #coverPic = models.blob
-    bio = models.CharField(max_length=300)
-    skills = models.JSONField(default = '{"skills" : [] }')
-    projects = models.JSONField(default = '{"projects" : [] }')
-    linkGithub = models.TextField(blank=True)
-    linkLinkedIn = models.TextField(blank=True)
-    linkExtra = models.JSONField(default = '{"links" : [] }')
-    dateJoined = models.DateField()
-    #lastLogin = models.DateField()
+
+class CustomAccountManager(BaseUserManager):
+    def create_user(self, userName, email, password, **other_fields):
+
+        email = self.normalize_email(email)
+        user = self.model(email=email, userName=userName, **other_fields)
+        user.set_password(password)
+        user.save()
+        return user
+
+    def create_superuser(self, email, userName, password, **other_fields):
+        other_fields.setdefault('is_staff', True)
+        other_fields.setdefault('is_superuser', True)
+        other_fields.setdefault('is_active', True)
+
+        return self.create_user(userName, email, password, **other_fields)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    userName = models.CharField(max_length=100, unique=True)
+    compName = models.CharField(max_length=50, blank=True)
+    firstName = models.CharField(max_length=50, blank=True)
+    lastName = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(max_length=70, unique=True)
+    bio = models.CharField(max_length=300, blank=True)
+    signUpDate = models.DateTimeField(default=timezone.now)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+    is_recruiter = models.BooleanField(default=False)
+    countryCode = models.CharField(max_length=5, blank=True)
+    contactNumber = models.CharField(max_length=10, blank=True)
+    dob = models.DateField(blank=True, null=True)
+    address = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=50, blank=True)
+    state = models.CharField(max_length=50, blank=True)
+    country = models.CharField(max_length=50, blank=True)
+    bio = models.CharField(max_length=300, blank=True)
+    skills = models.TextField(blank=True)
+    projects = models.TextField(blank=True)
+    linkGithub = models.URLField(blank=True)
+    linkLinkedIn = models.URLField(blank=True)
+    linkExtra = models.TextField(blank=True)
+
+    objects = CustomAccountManager()
+
+    USERNAME_FIELD = 'userName'
+    REQUIRED_FIELDS = ['email']
+
+    def __str(self):
+        return self.userName
 
 class postedJob(models.Model):
     title = models.CharField(max_length=50)
     jobPos = models.CharField(max_length=50)
     desc = models.CharField(max_length=50)
     timing = models.CharField(max_length=50)
-    reqSkill = models.JSONField(default = '{"skills" : [] }')
+    reqSkill = models.TextField(blank=True)
     expLevel = models.CharField(max_length=50)
     postedBy = models.CharField(max_length=50)
     location = models.CharField(max_length=50)
-    appliedPeople = models.JSONField(default = '{"ID" : [] }')
+    appliedPeople = models.TextField(blank=True)
 
-class compData(models.Model):
-    userName = models.CharField(max_length=100)
-    compName = models.CharField(max_length=50)
-    email = models.EmailField(max_length=70)
-    countryCode = models.CharField(max_length=5)
-    contactNumber = models.CharField(max_length=10)
-    address = models.CharField(max_length=100)
-    city = models.CharField(max_length=50)
-    state = models.CharField(max_length=50)
-    country = models.CharField(max_length=50)
-    #profilePic = models.blob
-    #coverPic = models.blob
-    bio = models.CharField(max_length=300)
-    linkGithub = models.TextField(blank=True)
-    linkLinkedIn = models.TextField(blank=True)
-    linkExtra = models.JSONField(default = '{"links" : [] }')
+
+class userAppliedJobs(models.Model):
+    userDataID = models.IntegerField()
+    appliedTo = models.TextField(blank=True)
 
 # 1. Delete your migrations files in your desired app
 # 2. Thanks to raul answer: In the database: DELETE FROM django_migrations WHERE app = 'app_name'.
