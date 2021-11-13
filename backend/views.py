@@ -1,29 +1,31 @@
 import json
 from django.http.response import JsonResponse
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt  # import
 from django.contrib.auth import authenticate, logout
-from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.auth.models import User, auth
-from .models import postedJob, userData
-from datetime import date
+# from django.contrib.auth.hashers import make_password, check_password
+# from django.contrib.auth.models import User, auth
+from .models import postedJob, User #userData
+# from datetime import timezone
+from django.utils import timezone
+
 
 
 @csrf_exempt
 def signup(request):
     if request.method == 'POST':
 
-        jsonData = json.loads(request.body)
+        signInData = json.loads(request.body)
 
-        user_name = jsonData['username']
-        first_N = jsonData['first_name']
-        last_N = jsonData['last_name']
-        e_Mail = jsonData['email']
-        dofb = jsonData['dob']
-        contact = jsonData['contact']
-        pass_word = jsonData['password']
+        user_name = signInData['username']
+        first_N = signInData['first_name']
+        last_N = signInData['last_name']
+        e_Mail = signInData['email']
+        dofb = signInData['dob']
+        contact = signInData['contact']
+        pass_word = signInData['password']
 
-        if User.objects.filter(username=user_name).exists():
+        if User.objects.filter(userName=user_name).exists():
             print("Username Taken")
             return JsonResponse({
                 "success": False,
@@ -35,26 +37,24 @@ def signup(request):
                 "success": False,
                 "error": "Email already Exist"
             })
+        elif User.objects.filter(contactNumber=contact).exists():
+            print("Mobile already Exist")
+            return JsonResponse({
+                "success": False,
+                "error": "Mobile already Exist"
+            })
+            
         else:
             user = User.objects.create_user(
                 password=pass_word,
-                username=user_name,
-                first_name=first_N,
-                last_name=last_N,
-                email=e_Mail
-            )
-            user.save()
-
-            signInData = userData(
                 userName=user_name,
                 firstName=first_N,
                 lastName=last_N,
                 email=e_Mail,
                 dob=dofb,
                 contactNumber=contact,
-                dateJoined=date.today()
             )
-            signInData.save()
+            user.save()
 
             userInfo = {
                 'User Name': user_name,
@@ -63,10 +63,8 @@ def signup(request):
                 'E-Mail': e_Mail,
                 'Date of Birth': dofb,
                 'Contact': contact,
-                'Encrypted Password': pass_word,
                 'success': True
             }
-            print(userInfo)
             print("Data Saved")
             return JsonResponse(userInfo)
     else:
@@ -76,6 +74,9 @@ def signup(request):
             "error": "Unknown error"
         })
 
+# "email": "jashsharma@gmail.com",
+# "contactNumber": "8319828866",
+
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -83,7 +84,7 @@ def login(request):
         if "userName" in jsonData.keys():
 
             user = authenticate(
-                username=jsonData['userName'],
+                userName=jsonData['userName'],
                 password=jsonData['password']
             )
 
@@ -97,20 +98,22 @@ def login(request):
                     "success": False,
                     "error": "Username or Password Wrong"
                 })
-        elif "email" in jsonData.keys():
+                
+        elif "email" in jsonData.keys():          
+            
             try:
                 userInfoByEmail = User.objects.get(email=jsonData['email'])
             except:
                 return JsonResponse({"Error": "No User Found"})
 
-            print(userInfoByEmail.username)
+            print(userInfoByEmail.userName)
             user = authenticate(
-                username=userInfoByEmail.username,
+                userName=userInfoByEmail.userName,
                 password=jsonData['password']
             )
 
             if user is not None:
-                request.session['user'] = userInfoByEmail.username
+                request.session['user'] = userInfoByEmail.userName
                 return JsonResponse({
                     "success": True,
                 })
@@ -119,14 +122,15 @@ def login(request):
                     "success": False,
                     "error": "Email or Password Wrong"
                 })
+                     
         else:
             try:
-                userInfoByCont = userData.objects.get(
+                userInfoByCont = User.objects.get(
                     contactNumber=jsonData['contactNumber'])
             except:
                 return JsonResponse({"Error": "Cont No User Found"})
             user = authenticate(
-                username=userInfoByCont.userName,
+                userName=userInfoByCont.userName,
                 password=jsonData['password'])
             if user is not None:
                 request.session['user'] = userInfoByCont.userName
@@ -162,7 +166,7 @@ def logouts(request):
 def userProfile(request, userID):
     try:
         print(userID)
-        userInformation = userData.objects.get(userName=userID)
+        userInformation = User.objects.get(userName=userID)
         return JsonResponse({
             "success": True,
             "Data": {
@@ -236,6 +240,6 @@ def apply(request,jobPostID):
     print(postedJobData.appliedPeople)
     # print(applicants.ID)
     
-    userProfileData = userData.objects.get(userName = currUser)
+    userProfileData = User.objects.get(userName = currUser)
     print(userProfileData.firstName)
     return JsonResponse({"ID" : userProfileData.id})
