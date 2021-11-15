@@ -8,7 +8,8 @@ urlpatterns = [
     path('logouts', views.logouts, name='logouts'),
     path('post-for-recruitment', views.postJob,name='recruitment'),
     path('update', views.updateData,name='updateData'),
+    path('jobs', views.jobs,name='jobs'),
     path('apply/<jobPostID>', views.apply,name='applyJob'),
-    # path('apply', views.postJob),
+    path('cancelJob/<jobPostID>', views.cancelJob,name='cancelJob'),
     path('<userID>', views.userProfile, name='userprofile'),
 ]
