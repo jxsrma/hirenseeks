@@ -1,11 +1,12 @@
 import json
-from django.http.response import JsonResponse
+from typing import List
+from django.http.response import HttpResponse, JsonResponse
 # from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt  # import
 from django.contrib.auth import authenticate, logout
 # from django.contrib.auth.hashers import make_password, check_password
 # from django.contrib.auth.models import User, auth
-from .models import postedJob, User #userData
+from .models import postedJob, User, userAppliedJobs #userData
 # from datetime import timezone
 from django.utils import timezone
 
@@ -55,6 +56,11 @@ def signup(request):
                 contactNumber=contact,
             )
             user.save()
+            
+            appliedJobs = userAppliedJobs(
+                userNameJobs =  user_name
+            )
+            appliedJobs.save()
 
             userInfo = {
                 'User Name': user_name,
@@ -80,16 +86,16 @@ def signup(request):
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
-        jsonData = json.loads(request.body)
-        if "userName" in jsonData.keys():
+        loginData = json.loads(request.body)
+        if "userName" in loginData.keys():
 
             user = authenticate(
-                userName=jsonData['userName'],
-                password=jsonData['password']
+                userName=loginData['userName'],
+                password=loginData['password']
             )
 
             if user is not None:
-                request.session['user'] = jsonData['userName']
+                request.session['user'] = loginData['userName']
                 return JsonResponse({
                     "success": True,
                 })
@@ -99,17 +105,17 @@ def login(request):
                     "error": "Username or Password Wrong"
                 })
                 
-        elif "email" in jsonData.keys():          
+        elif "email" in loginData.keys():          
             
             try:
-                userInfoByEmail = User.objects.get(email=jsonData['email'])
+                userInfoByEmail = User.objects.get(email=loginData['email'])
             except:
                 return JsonResponse({"Error": "No User Found"})
 
             print(userInfoByEmail.userName)
             user = authenticate(
                 userName=userInfoByEmail.userName,
-                password=jsonData['password']
+                password=loginData['password']
             )
 
             if user is not None:
@@ -126,12 +132,12 @@ def login(request):
         else:
             try:
                 userInfoByCont = User.objects.get(
-                    contactNumber=jsonData['contactNumber'])
+                    contactNumber=loginData['contactNumber'])
             except:
                 return JsonResponse({"Error": "Cont No User Found"})
             user = authenticate(
                 userName=userInfoByCont.userName,
-                password=jsonData['password'])
+                password=loginData['password'])
             if user is not None:
                 request.session['user'] = userInfoByCont.userName
                 return JsonResponse({
@@ -159,7 +165,8 @@ def user(request):
 def logouts(request):
     logout(request)
     return JsonResponse({
-        "User": "None"
+        "success": True,
+        "User": "None: Logged Out"
     })
 
 @csrf_exempt
@@ -235,11 +242,61 @@ def apply(request,jobPostID):
     currUser = request.session.get('user')
     postedJobData = postedJob.objects.get(id = jobPostID)
     
-    # applicants = dict(postedJobData.appliedPeople)
     
-    print(postedJobData.appliedPeople)
-    # print(applicants.ID)
+    # Saving Data in PostedJob Model
     
-    userProfileData = User.objects.get(userName = currUser)
-    print(userProfileData.firstName)
-    return JsonResponse({"ID" : userProfileData.id})
+    applicants = postedJobData.appliedPeople
+    appliList = list(applicants.split(" "))
+    
+    if currUser in appliList:
+        return JsonResponse({
+            'success' : False,
+            'error' : 'Already Applied',
+        })
+    
+    else:
+        appliList.append(currUser)
+        
+        appliString = " "
+        
+        finalAppli = appliString.join(appliList)
+        print(finalAppli)
+        
+        postedJobData.appliedPeople = finalAppli
+        postedJobData.save()
+        
+        # Saving Data in userAppliedJobs Model
+                
+        userJobs = userAppliedJobs.objects.get(userNameJobs = currUser)
+        
+        jobsApplied = userJobs.appliedTo
+        jobsAppliedList = list(jobsApplied.split(" "))
+        
+        jobsAppliedList.append(jobPostID)
+        
+        userAppliString = " "
+        
+        FinaluserApplJob = userAppliString.join(jobsAppliedList)
+        print(FinaluserApplJob)
+        
+        userJobs.appliedTo = FinaluserApplJob
+        userJobs.save()
+        
+        return JsonResponse({
+            'success' : True,
+            'user applied' : currUser})
+
+@csrf_exempt
+def updateData(request): #Under Construction
+    if request.method == 'POST':
+        
+        userData = User.object.get(userName = request.session.get('user'))
+        
+        upData = json.loads(request.body)
+        
+        if User.objects.filter(userName=upData['userName']).exists():
+            print("Username Taken")
+            return JsonResponse({
+                "success": False,
+                "error": "User name Taken"
+            })

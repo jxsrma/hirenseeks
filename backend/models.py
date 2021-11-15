@@ -42,11 +42,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     state = models.CharField(max_length=50, blank=True)
     country = models.CharField(max_length=50, blank=True)
     bio = models.CharField(max_length=300, blank=True)
-    skills = models.TextField(blank=True)
-    projects = models.TextField(blank=True)
+    skills = models.TextField(blank=True, default="")
+    projects = models.TextField(blank=True, default="")
     linkGithub = models.URLField(blank=True)
     linkLinkedIn = models.URLField(blank=True)
-    linkExtra = models.TextField(blank=True)
+    linkExtra = models.TextField(blank=True, default="")
 
     objects = CustomAccountManager()
 
@@ -65,12 +65,12 @@ class postedJob(models.Model):
     expLevel = models.CharField(max_length=50)
     postedBy = models.CharField(max_length=50)
     location = models.CharField(max_length=50)
-    appliedPeople = models.TextField(blank=True)
+    appliedPeople = models.TextField(blank=True, default="")
 
 
 class userAppliedJobs(models.Model):
-    userDataID = models.IntegerField()
-    appliedTo = models.TextField(blank=True)
+    userNameJobs = models.CharField(max_length=100)
+    appliedTo = models.TextField(blank=True, default="",)
 
 # 1. Delete your migrations files in your desired app
 # 2. Thanks to raul answer: In the database: DELETE FROM django_migrations WHERE app = 'app_name'.
