@@ -47,6 +47,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     linkGithub = models.URLField(blank=True)
     linkLinkedIn = models.URLField(blank=True)
     linkExtra = models.TextField(blank=True, default="")
+    appliedJobsTo = models.TextField(blank=True, default="")
 
     objects = CustomAccountManager()
 
@@ -57,6 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.userName
 
 class postedJob(models.Model):
+    jobDate = models.DateTimeField(default=timezone.now)
     title = models.CharField(max_length=50)
     jobPos = models.CharField(max_length=50)
     desc = models.CharField(max_length=50)
@@ -67,10 +69,6 @@ class postedJob(models.Model):
     location = models.CharField(max_length=50)
     appliedPeople = models.TextField(blank=True, default="")
 
-
-class userAppliedJobs(models.Model):
-    userNameJobs = models.CharField(max_length=100)
-    appliedTo = models.TextField(blank=True, default="",)
 
 # 1. Delete your migrations files in your desired app
 # 2. Thanks to raul answer: In the database: DELETE FROM django_migrations WHERE app = 'app_name'.
