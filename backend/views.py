@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt  # import
 from django.contrib.auth import authenticate, logout
 # from django.contrib.auth.hashers import make_password, check_password
 # from django.contrib.auth.models import User, auth
-from .models import postedJob, User, userAppliedJobs #userData
+from .models import User, postedJob 
 # from datetime import timezone
 from django.utils import timezone
 
@@ -56,12 +56,6 @@ def signup(request):
                 contactNumber=contact,
             )
             user.save()
-            
-            appliedJobs = userAppliedJobs(
-                userNameJobs =  user_name
-            )
-            appliedJobs.save()
-
             userInfo = {
                 'User Name': user_name,
                 'First Name': first_N,
@@ -207,6 +201,7 @@ def postJob(request):
     if request.method == 'POST':
         jobData = json.loads(request.body)
         job = postedJob(
+            jobDate = timezone.now(),
             title=jobData['title'],
             jobPos=jobData['jobPos'],
             desc=jobData['desc'],
@@ -240,8 +235,9 @@ def apply(request,jobPostID):
 
      
     currUser = request.session.get('user')
-    postedJobData = postedJob.objects.get(id = jobPostID)
+    currUserID = User.objects.get(userName = currUser)
     
+    postedJobData = postedJob.objects.get(id = jobPostID)
     
     # Saving Data in PostedJob Model
     
@@ -255,7 +251,8 @@ def apply(request,jobPostID):
         })
     
     else:
-        appliList.append(currUser)
+        
+        appliList.append(str(currUserID.id))
         
         appliString = " "
         
@@ -265,11 +262,9 @@ def apply(request,jobPostID):
         postedJobData.appliedPeople = finalAppli
         postedJobData.save()
         
-        # Saving Data in userAppliedJobs Model
-                
-        userJobs = userAppliedJobs.objects.get(userNameJobs = currUser)
+        # Saving Data for User Applied Job in appliedJobsTo Model
         
-        jobsApplied = userJobs.appliedTo
+        jobsApplied = currUserID.appliedJobsTo
         jobsAppliedList = list(jobsApplied.split(" "))
         
         jobsAppliedList.append(jobPostID)
@@ -279,12 +274,61 @@ def apply(request,jobPostID):
         FinaluserApplJob = userAppliString.join(jobsAppliedList)
         print(FinaluserApplJob)
         
-        userJobs.appliedTo = FinaluserApplJob
-        userJobs.save()
+        currUserID.appliedJobsTo = FinaluserApplJob
+        currUserID.save()
         
         return JsonResponse({
             'success' : True,
             'user applied' : currUser})
+
+@csrf_exempt
+def cancelJob(request,jobPostID):
+    
+    currUser = request.session.get('user')
+    currUserID = User.objects.get(userName = currUser)
+    
+    postedJobData = postedJob.objects.get(id = jobPostID)
+    
+    applicants = postedJobData.appliedPeople
+    appliList = list(applicants.split(" ")) 
+    
+    if str(currUserID.id) in appliList:
+        
+        
+        appliList.remove(str(currUserID.id))
+        
+        appliString = " "
+        
+        finalAppli = appliString.join(appliList)
+        print(finalAppli)
+        
+        postedJobData.appliedPeople = finalAppli
+        postedJobData.save()
+        
+        # Saving Data for User Applied Job in appliedJobsTo Model
+        
+        jobsApplied = currUserID.appliedJobsTo
+        jobsAppliedList = list(jobsApplied.split(" "))
+        
+        jobsAppliedList.remove(jobPostID)
+        
+        userAppliString = " "
+        
+        FinaluserApplJob = userAppliString.join(jobsAppliedList)
+        print(FinaluserApplJob)
+        
+        currUserID.appliedJobsTo = FinaluserApplJob
+        currUserID.save()
+        
+        return JsonResponse({
+            'success' : True,
+        })
+    
+    else:
+        return JsonResponse({
+            'success' : False,
+            'error' : 'User was Not Applied to the job'})
+
 
 @csrf_exempt
 def updateData(request): #Under Construction
@@ -300,3 +344,8 @@ def updateData(request): #Under Construction
                 "success": False,
                 "error": "User name Taken"
             })
+            
+@csrf_exempt
+def jobs(request):
+    joblist = list(postedJob.objects.values())
+    return JsonResponse(joblist,safe=False)
