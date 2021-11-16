@@ -227,7 +227,7 @@ def postJob(request):
         })
         
     return JsonResponse({
-        "success": True,
+        "success": False,
     })
 
 @csrf_exempt
