@@ -54,6 +54,7 @@ def signup(request):
                 email=e_Mail,
                 dob=dofb,
                 contactNumber=contact,
+                is_recruiter = 1,
             )
             user.save()
             userInfo = {
@@ -99,7 +100,7 @@ def login(request):
                     "error": "Username or Password Wrong"
                 })
                 
-        elif "email" in loginData.keys():          
+        elif "email" in loginData.keys():
             
             try:
                 userInfoByEmail = User.objects.get(email=loginData['email'])
@@ -330,7 +331,6 @@ def cancelJob(request,jobPostID):
             'success' : False,
             'error' : 'User was Not Applied to the job'})
 
-
 @csrf_exempt
 def updateData(request): #Under Construction
     if request.method == 'POST':
@@ -339,12 +339,40 @@ def updateData(request): #Under Construction
         
         upData = json.loads(request.body)
         
-        if User.objects.filter(userName=upData['userName']).exists():
-            print("Username Taken")
-            return JsonResponse({
-                "success": False,
-                "error": "User name Taken"
-            })
+        userData(
+                userName = upData['userName'],
+                firstName = upData['firstName'],
+                lastName = upData['lastName'],
+                email = upData['email'],
+                bio = upData['bio'],
+                countryCode = upData['countryCode'],
+                contactNumber = upData['contactNumber'],
+                dob = upData['dob'],
+                address = upData['address'],
+                city = upData['city'],
+                state = upData['state'],
+                country = upData['country'],
+                skills = upData['skills'],
+                projects = upData['projects'],
+                linkGithub = upData['linkGithub'],
+                linkLinkedIn = upData['linkLinkedIn'],
+                linkExtra = upData['linkExtra'],
+                appliedJobsTo = upData['appliedJobsTo'],
+            )
+        userData.save()
+        
+        # if User.objects.filter(userName=upData['userName']).exists():
+        #     print("Username Taken")
+        #     return JsonResponse({
+        #         "success": False,
+        #         "error": "User name Taken"
+        #     })
+        # elif User.objects.filter(contactNumber=upData['userName']).exists():
+        #     print("Username Taken")
+        #     return JsonResponse({
+        #         "success": False,
+        #         "error": "User name Taken"
+        #     })
             
 @csrf_exempt
 def jobs(request):
