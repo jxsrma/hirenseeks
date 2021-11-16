@@ -244,7 +244,7 @@ def apply(request,jobPostID):
     applicants = postedJobData.appliedPeople
     appliList = list(applicants.split(" "))
     
-    if currUser in appliList:
+    if str(currUserID.id) in appliList:
         return JsonResponse({
             'success' : False,
             'error' : 'Already Applied',
