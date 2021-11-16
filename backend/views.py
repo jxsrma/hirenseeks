@@ -186,6 +186,7 @@ def userProfile(request, userID):
                 'linkGithub': userInformation.linkGithub,
                 'linkLinkedIn': userInformation.linkLinkedIn,
                 'linkExtra': userInformation.linkExtra,
+                'isRecruiter': userInformation.is_recruiter,
             }
         })
     except Exception as e:
