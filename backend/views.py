@@ -6,10 +6,9 @@ from django.views.decorators.csrf import csrf_exempt  # import
 from django.contrib.auth import authenticate, logout
 # from django.contrib.auth.hashers import make_password, check_password
 # from django.contrib.auth.models import User, auth
-from .models import User, postedJob 
+from .models import User, postedJob
 # from datetime import timezone
 from django.utils import timezone
-
 
 
 @csrf_exempt
@@ -44,7 +43,7 @@ def signup(request):
                 "success": False,
                 "error": "Mobile already Exist"
             })
-            
+
         else:
             user = User.objects.create_user(
                 password=pass_word,
@@ -54,7 +53,7 @@ def signup(request):
                 email=e_Mail,
                 dob=dofb,
                 contactNumber=contact,
-                is_recruiter = 1,
+                is_recruiter=1,
             )
             user.save()
             userInfo = {
@@ -78,6 +77,7 @@ def signup(request):
 # "email": "jashsharma@gmail.com",
 # "contactNumber": "8319828866",
 
+
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -99,9 +99,9 @@ def login(request):
                     "success": False,
                     "error": "Username or Password Wrong"
                 })
-                
+
         elif "email" in loginData.keys():
-            
+
             try:
                 userInfoByEmail = User.objects.get(email=loginData['email'])
             except:
@@ -123,7 +123,7 @@ def login(request):
                     "success": False,
                     "error": "Email or Password Wrong"
                 })
-                     
+
         else:
             try:
                 userInfoByCont = User.objects.get(
@@ -150,11 +150,13 @@ def login(request):
             "error": "No Request"
         })
 
+
 @csrf_exempt
 def user(request):
     return JsonResponse({
         "User": request.session.get('user')
     })
+
 
 @csrf_exempt
 def logouts(request):
@@ -164,11 +166,14 @@ def logouts(request):
         "User": "None: Logged Out"
     })
 
+
 @csrf_exempt
 def userProfile(request, userID):
     try:
         print(userID)
         userInformation = User.objects.get(userName=userID)
+
+        
         return JsonResponse({
             "success": True,
             "Data": {
@@ -197,13 +202,14 @@ def userProfile(request, userID):
             "error": "User not found"
         })
 
+
 @csrf_exempt
 def postJob(request):
 
     if request.method == 'POST':
         jobData = json.loads(request.body)
         job = postedJob(
-            jobDate = timezone.now(),
+            jobDate=timezone.now(),
             title=jobData['title'],
             jobPos=jobData['jobPos'],
             desc=jobData['desc'],
@@ -227,140 +233,176 @@ def postJob(request):
                 "location": jobData['location']
             }
         })
-        
+
     return JsonResponse({
         "success": False,
     })
 
-@csrf_exempt
-def apply(request,jobPostID):
 
-     
+@csrf_exempt
+def apply(request, jobPostID):
+
     currUser = request.session.get('user')
-    currUserID = User.objects.get(userName = currUser)
-    
-    postedJobData = postedJob.objects.get(id = jobPostID)
-    
+    currUserID = User.objects.get(userName=currUser)
+
+    postedJobData = postedJob.objects.get(id=jobPostID)
+
     # Saving Data in PostedJob Model
-    
+
     applicants = postedJobData.appliedPeople
     appliList = list(applicants.split(" "))
-    
+
     if str(currUserID.id) in appliList:
         return JsonResponse({
-            'success' : False,
-            'error' : 'Already Applied',
+            'success': False,
+            'error': 'Already Applied',
         })
-    
+
     else:
-        
+
         appliList.append(str(currUserID.id))
-        
+
         appliString = " "
-        
+
         finalAppli = appliString.join(appliList)
         print(finalAppli)
-        
+
         postedJobData.appliedPeople = finalAppli
         postedJobData.save()
-        
+
         # Saving Data for User Applied Job in appliedJobsTo Model
-        
+
         jobsApplied = currUserID.appliedJobsTo
         jobsAppliedList = list(jobsApplied.split(" "))
-        
+
         jobsAppliedList.append(jobPostID)
-        
+
         userAppliString = " "
-        
+
         FinaluserApplJob = userAppliString.join(jobsAppliedList)
         print(FinaluserApplJob)
-        
+
         currUserID.appliedJobsTo = FinaluserApplJob
         currUserID.save()
-        
+
         return JsonResponse({
-            'success' : True,
-            'user applied' : currUser})
+            'success': True,
+            'user applied': currUser})
+
 
 @csrf_exempt
-def cancelJob(request,jobPostID):
-    
+def cancelJob(request, jobPostID):
+
     currUser = request.session.get('user')
-    currUserID = User.objects.get(userName = currUser)
-    
-    postedJobData = postedJob.objects.get(id = jobPostID)
-    
+    currUserID = User.objects.get(userName=currUser)
+
+    postedJobData = postedJob.objects.get(id=jobPostID)
+
     applicants = postedJobData.appliedPeople
-    appliList = list(applicants.split(" ")) 
-    
+    appliList = list(applicants.split(" "))
+
     if str(currUserID.id) in appliList:
-        
-        
+
         appliList.remove(str(currUserID.id))
-        
+
         appliString = " "
-        
+
         finalAppli = appliString.join(appliList)
         print(finalAppli)
-        
+
         postedJobData.appliedPeople = finalAppli
         postedJobData.save()
-        
+
         # Saving Data for User Applied Job in appliedJobsTo Model
-        
+
         jobsApplied = currUserID.appliedJobsTo
         jobsAppliedList = list(jobsApplied.split(" "))
-        
+
         jobsAppliedList.remove(jobPostID)
-        
+
         userAppliString = " "
-        
+
         FinaluserApplJob = userAppliString.join(jobsAppliedList)
         print(FinaluserApplJob)
-        
+
         currUserID.appliedJobsTo = FinaluserApplJob
         currUserID.save()
-        
+
         return JsonResponse({
-            'success' : True,
+            'success': True,
         })
-    
+
     else:
         return JsonResponse({
-            'success' : False,
-            'error' : 'User was Not Applied to the job'})
+            'success': False,
+            'error': 'User was Not Applied to the job'})
+
 
 @csrf_exempt
-def updateData(request): #Under Construction
+def updateData(request):  # Under Construction
     if request.method == 'POST':
-        
-        userData = User.object.get(userName = request.session.get('user'))
-        
         upData = json.loads(request.body)
         
-        userData(
-                userName = upData['userName'],
-                firstName = upData['firstName'],
-                lastName = upData['lastName'],
-                email = upData['email'],
-                bio = upData['bio'],
-                countryCode = upData['countryCode'],
-                contactNumber = upData['contactNumber'],
-                dob = upData['dob'],
-                address = upData['address'],
-                city = upData['city'],
-                state = upData['state'],
-                country = upData['country'],
-                skills = upData['skills'],
-                projects = upData['projects'],
-                linkGithub = upData['linkGithub'],
-                linkLinkedIn = upData['linkLinkedIn'],
-                linkExtra = upData['linkExtra'],
-                appliedJobsTo = upData['appliedJobsTo'],
-            )
+        currUser = request.session.get('user')
+                
+        userData = User.objects.get(userName=currUser)
+        
+        # Username Validation        
+        if userData.userName != upData['userName']:
+            if User.objects.filter(userName = upData['userName']).exists():
+                return JsonResponse({
+                    "success": False,
+                    "error": "Username Taken"
+                })
+            else:
+                userData.userName = upData['userName']
+                logout(request)
+
+                
+        # Email Validation        
+        elif userData.email != upData['email']:
+            if User.objects.filter(email = upData['email']).exists():
+                return JsonResponse({
+                    "success": False,
+                    "error": "Email Taken"
+                })
+            else:
+                userData.email = upData['email']
+              
+        
+        # Contact Validation        
+        elif userData.contactNumber != upData['contactNumber']:
+            if User.objects.filter(contactNumber = upData['contactNumber']).exists():
+                return JsonResponse({
+                    "success": False,
+                    "error": "Contact Taken"
+                })
+            else:
+                userData.contactNumber = upData['contactNumber']
+        
+        userData.firstName = upData['firstName']
+        userData.lastName = upData['lastName']
+        userData.bio = upData['bio']
+        userData.dob = upData['dob']
+        userData.address = upData['address']
+        userData.city = upData['city']
+        userData.state = upData['state']
+        userData.country = upData['country']
+        userData.skills = upData['skills']
+        userData.projects = upData['projects']
+        userData.linkGithub = upData['linkGithub']
+        userData.linkLinkedIn = upData['linkLinkedIn']
+        userData.linkExtra = upData['linkExtra']       
+        
         userData.save()
         
+        
+        # logouts()
+
+        return JsonResponse({
+            'success': True,
+        })
+
         # if User.objects.filter(userName=upData['userName']).exists():
         #     print("Username Taken")
         #     return JsonResponse({
@@ -373,8 +415,9 @@ def updateData(request): #Under Construction
         #         "success": False,
         #         "error": "User name Taken"
         #     })
-            
+
+
 @csrf_exempt
 def jobs(request):
     joblist = list(postedJob.objects.values())
-    return JsonResponse(joblist,safe=False)
+    return JsonResponse(joblist, safe=False)
