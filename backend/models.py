@@ -41,7 +41,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=50, blank=True)
     state = models.CharField(max_length=50, blank=True)
     country = models.CharField(max_length=50, blank=True)
-    bio = models.CharField(max_length=300, blank=True)
     skills = models.TextField(blank=True, default="")
     projects = models.TextField(blank=True, default="")
     linkGithub = models.URLField(blank=True)
