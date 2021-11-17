@@ -186,6 +186,7 @@ def userProfile(request, userID):
                 'address': userInformation.address,
                 'city': userInformation.city,
                 'state': userInformation.state,
+                'country': userInformation.country,
                 'bio': userInformation.bio,
                 'skills': userInformation.skills,
                 'projects': userInformation.projects,
@@ -379,7 +380,7 @@ def updateData(request):  # Under Construction
                 })
             else:
                 userData.contactNumber = upData['contactNumber']
-        
+
         userData.firstName = upData['firstName']
         userData.lastName = upData['lastName']
         userData.bio = upData['bio']
