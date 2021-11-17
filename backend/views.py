@@ -53,7 +53,7 @@ def signup(request):
                 email=e_Mail,
                 dob=dofb,
                 contactNumber=contact,
-                is_recruiter=1,
+                is_active=1,
             )
             user.save()
             userInfo = {
