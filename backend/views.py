@@ -176,7 +176,7 @@ def userProfile(request, userID):
         
         return JsonResponse({
             "success": True,
-            "Data": {
+            "data": {
                 'userName': userInformation.userName,
                 'firstName': userInformation.firstName,
                 'lastName': userInformation.lastName,
@@ -224,7 +224,7 @@ def postJob(request):
         print(jobData['reqSkill'])
         return JsonResponse({
             "success": True,
-            "Data": {
+            "data": {
                 "title": jobData['title'],
                 "jobPos": jobData['jobPos'],
                 "desc": jobData['desc'],
@@ -361,7 +361,7 @@ def updateData(request):  # Under Construction
 
                 
         # Email Validation        
-        elif userData.email != upData['email']:
+        if userData.email != upData['email']:
             if User.objects.filter(email = upData['email']).exists():
                 return JsonResponse({
                     "success": False,
@@ -372,7 +372,7 @@ def updateData(request):  # Under Construction
               
         
         # Contact Validation        
-        elif userData.contactNumber != upData['contactNumber']:
+        if userData.contactNumber != upData['contactNumber']:
             if User.objects.filter(contactNumber = upData['contactNumber']).exists():
                 return JsonResponse({
                     "success": False,
