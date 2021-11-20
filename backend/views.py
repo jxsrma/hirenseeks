@@ -74,9 +74,6 @@ def signup(request):
             "error": "Unknown error"
         })
 
-# "email": "jashsharma@gmail.com",
-# "contactNumber": "8319828866",
-
 
 @csrf_exempt
 def login(request):
@@ -173,7 +170,6 @@ def userProfile(request, userID):
         print(userID)
         userInformation = User.objects.get(userName=userID)
 
-        
         return JsonResponse({
             "success": True,
             "data": {
@@ -247,7 +243,8 @@ def postJob(request):
     return JsonResponse({
         "success": False,
     })
-    
+
+
 @csrf_exempt
 def jobPostedBy(request):
     currUser = request.session.get('user')
@@ -258,7 +255,7 @@ def jobPostedBy(request):
         userNameOfApplicants = []
         for appUser in appPeople:
             try:
-                appData = User.objects.get(id = appUser)
+                appData = User.objects.get(id=appUser)
                 userNameOfApplicants.append(appData.userName)
             except:
                 print('Null User ID')
@@ -271,10 +268,10 @@ def jobPostedBy(request):
             'expLevel': jobs.expLevel,
             'location': jobs.location,
             'appliedPeople': userNameOfApplicants
-            
+
         }
         jobsList.append(jobObjDict)
-    return JsonResponse({"Jobs":jobsList})
+    return JsonResponse({"Jobs": jobsList})
 
 
 @csrf_exempt
@@ -308,7 +305,7 @@ def apply(request, jobPostID):
         postedJobData.appliedPeople = finalAppli
         postedJobData.save()
 
-        # Saving Data for User Applied Job in appliedJobsTo Model
+        # Saving Data for appliedJobsTo in User Model
 
         jobsApplied = currUserID.appliedJobsTo
         jobsAppliedList = list(jobsApplied.split(" "))
@@ -326,6 +323,47 @@ def apply(request, jobPostID):
         return JsonResponse({
             'success': True,
             'user applied': currUser})
+
+
+@csrf_exempt
+def userAppliedJobs(request):
+    currUser = request.session.get('user')
+    currUserData = User.objects.get(userName=currUser)
+
+    jobsID = currUserData.appliedJobsTo
+        
+    if len(jobsID) == 0:
+        return JsonResponse({
+        "message": "No jobs Applied"
+    })
+        
+    else:
+    
+        appJobs = list(jobsID.split(" "))
+        jobsAppliedList = []
+
+        for jobsApplied in appJobs:
+            try:
+                jobData = postedJob.objects.get(id=jobsApplied)
+
+                jobObjDict = {
+                    'title': jobData.title,
+                    'jobPos': jobData.jobPos,
+                    'desc': jobData.desc,
+                    'reqSkill': jobData.reqSkill,
+                    'expLevel': jobData.expLevel,
+                    'location': jobData.location,
+                }
+
+                jobsAppliedList.append(jobObjDict)
+            except:
+                print('Null Job ID')
+
+        print(jobsAppliedList)
+
+        return JsonResponse({
+            "Jobs": jobsAppliedList
+        })
 
 
 @csrf_exempt
@@ -351,7 +389,7 @@ def cancelJob(request, jobPostID):
         postedJobData.appliedPeople = finalAppli
         postedJobData.save()
 
-        # Saving Data for User Applied Job in appliedJobsTo Model
+        # Saving Data for appliedJobsTo in User Model
 
         jobsApplied = currUserID.appliedJobsTo
         jobsAppliedList = list(jobsApplied.split(" "))
@@ -380,14 +418,14 @@ def cancelJob(request, jobPostID):
 def updateData(request):  # Under Construction
     if request.method == 'POST':
         upData = json.loads(request.body)
-        
+
         currUser = request.session.get('user')
-                
+
         userData = User.objects.get(userName=currUser)
-        
-        # Username Validation        
+
+        # Username Validation
         if userData.userName != upData['userName']:
-            if User.objects.filter(userName = upData['userName']).exists():
+            if User.objects.filter(userName=upData['userName']).exists():
                 return JsonResponse({
                     "success": False,
                     "error": "Username Taken"
@@ -396,21 +434,19 @@ def updateData(request):  # Under Construction
                 userData.userName = upData['userName']
                 logout(request)
 
-                
-        # Email Validation        
+        # Email Validation
         if userData.email != upData['email']:
-            if User.objects.filter(email = upData['email']).exists():
+            if User.objects.filter(email=upData['email']).exists():
                 return JsonResponse({
                     "success": False,
                     "error": "Email Taken"
                 })
             else:
                 userData.email = upData['email']
-              
-        
-        # Contact Validation        
+
+        # Contact Validation
         if userData.contactNumber != upData['contactNumber']:
-            if User.objects.filter(contactNumber = upData['contactNumber']).exists():
+            if User.objects.filter(contactNumber=upData['contactNumber']).exists():
                 return JsonResponse({
                     "success": False,
                     "error": "Contact Taken"
@@ -430,11 +466,10 @@ def updateData(request):  # Under Construction
         userData.projects = upData['projects']
         userData.linkGithub = upData['linkGithub']
         userData.linkLinkedIn = upData['linkLinkedIn']
-        userData.linkExtra = upData['linkExtra']       
-        
+        userData.linkExtra = upData['linkExtra']
+
         userData.save()
-        
-        
+
         # logouts()
 
         return JsonResponse({
