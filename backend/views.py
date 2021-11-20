@@ -358,7 +358,8 @@ def userAppliedJobs(request):
         
     if len(jobsID) == 0:
         return JsonResponse({
-        "message": "No jobs Applied"
+            "success" : False,
+            "error": "No jobs Applied"
     })
         
     else:
@@ -389,6 +390,7 @@ def userAppliedJobs(request):
         print(jobsAppliedList)
 
         return JsonResponse({
+            "success" : True,
             "Jobs": jobsAppliedList
         })
 
