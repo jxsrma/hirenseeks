@@ -60,7 +60,7 @@ class postedJob(models.Model):
     jobDate = models.DateTimeField(default=timezone.now)
     title = models.CharField(max_length=50)
     jobPos = models.CharField(max_length=50)
-    desc = models.CharField(max_length=50)
+    desc = models.CharField(max_length=300)
     timing = models.CharField(max_length=50)
     reqSkill = models.TextField(blank=True)
     expLevel = models.CharField(max_length=50)

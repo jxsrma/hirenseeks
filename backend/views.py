@@ -206,6 +206,15 @@ def userProfile(request, userID):
 
 @csrf_exempt
 def postJob(request):
+    # {
+    # "title" : "Data Scientist Required",
+    # "jobPos" : "Data Scientist",
+    # "desc" : "job Desc",
+    # "timing" : "10 AM - 8 PM",
+    # "reqSkill" : ["Python","Numpy","Pandas"],
+    # "expLevel" : "2 - 4 years",
+    # "location" : "Indore"
+    # }
 
     if request.method == 'POST':
         jobData = json.loads(request.body)
@@ -238,6 +247,34 @@ def postJob(request):
     return JsonResponse({
         "success": False,
     })
+    
+@csrf_exempt
+def jobPostedBy(request):
+    currUser = request.session.get('user')
+    jobsPostedBy = postedJob.objects.filter(postedBy=currUser)
+    jobsList = []
+    for jobs in jobsPostedBy:
+        appPeople = list(jobs.appliedPeople.split(" "))
+        userNameOfApplicants = []
+        for appUser in appPeople:
+            try:
+                appData = User.objects.get(id = appUser)
+                userNameOfApplicants.append(appData.userName)
+            except:
+                print('Null User ID')
+
+        jobObjDict = {
+            'title': jobs.title,
+            'jobPos': jobs.jobPos,
+            'desc': jobs.desc,
+            'reqSkill': jobs.reqSkill,
+            'expLevel': jobs.expLevel,
+            'location': jobs.location,
+            'appliedPeople': userNameOfApplicants
+            
+        }
+        jobsList.append(jobObjDict)
+    return JsonResponse({"Jobs":jobsList})
 
 
 @csrf_exempt
