@@ -211,38 +211,46 @@ def postJob(request):
     # "expLevel" : "2 - 4 years",
     # "location" : "Indore"
     # }
+    currUser = request.session.get('user')
+    currUserID = User.objects.get(userName=currUser)
 
-    if request.method == 'POST':
-        jobData = json.loads(request.body)
-        job = postedJob(
-            jobDate=timezone.now(),
-            title=jobData['title'],
-            jobPos=jobData['jobPos'],
-            desc=jobData['desc'],
-            timing=jobData['timing'],
-            reqSkill=jobData['reqSkill'],
-            expLevel=jobData['expLevel'],
-            postedBy=request.session.get('user'),
-            location=jobData['location'],
-        )
-        job.save()
-        print(jobData['reqSkill'])
+    if currUserID.is_recruiter == 0:
         return JsonResponse({
-            "success": True,
-            "data": {
-                "title": jobData['title'],
-                "jobPos": jobData['jobPos'],
-                "desc": jobData['desc'],
-                "timing": jobData['timing'],
-                "reqSkill": jobData['reqSkill'],
-                "expLevel": jobData['expLevel'],
-                "location": jobData['location']
-            }
+            "message" : "User Cannot Post Jobs"
         })
+    
+    else:
+        if request.method == 'POST':
+            jobData = json.loads(request.body)
+            job = postedJob(
+                jobDate=timezone.now(),
+                title=jobData['title'],
+                jobPos=jobData['jobPos'],
+                desc=jobData['desc'],
+                timing=jobData['timing'],
+                reqSkill=jobData['reqSkill'],
+                expLevel=jobData['expLevel'],
+                postedBy=request.session.get('user'),
+                location=jobData['location'],
+            )
+            job.save()
+            print(jobData['reqSkill'])
+            return JsonResponse({
+                "success": True,
+                "data": {
+                    "title": jobData['title'],
+                    "jobPos": jobData['jobPos'],
+                    "desc": jobData['desc'],
+                    "timing": jobData['timing'],
+                    "reqSkill": jobData['reqSkill'],
+                    "expLevel": jobData['expLevel'],
+                    "location": jobData['location']
+                }
+            })
 
-    return JsonResponse({
-        "success": False,
-    })
+        return JsonResponse({
+            "success": False,
+        })
 
 
 @csrf_exempt
@@ -289,49 +297,55 @@ def apply(request, jobPostID):
     currUser = request.session.get('user')
     currUserID = User.objects.get(userName=currUser)
 
-    postedJobData = postedJob.objects.get(id=jobPostID)
-
-    # Saving Data in PostedJob Model
-
-    applicants = postedJobData.appliedPeople
-    appliList = list(applicants.split(" "))
-
-    if str(currUserID.id) in appliList:
+    if currUserID.is_recruiter == 1:
         return JsonResponse({
-            'success': False,
-            'error': 'Already Applied',
+            "message" : "Recruiter Cannot Apply to Jobs"
         })
-
+    
     else:
+    
+        postedJobData = postedJob.objects.get(id=jobPostID)
 
-        appliList.append(str(currUserID.id))
+        # Saving Data in PostedJob Model
 
-        appliString = " "
+        applicants = postedJobData.appliedPeople
+        appliList = list(applicants.split(" "))
 
-        finalAppli = appliString.join(appliList)
-        print(finalAppli)
+        if str(currUserID.id) in appliList:
+            return JsonResponse({
+                'success': False,
+                'error': 'Already Applied',
+            })
 
-        postedJobData.appliedPeople = finalAppli
-        postedJobData.save()
+        else:
+            appliList.append(str(currUserID.id))
 
-        # Saving Data for appliedJobsTo in User Model
+            appliString = " "
 
-        jobsApplied = currUserID.appliedJobsTo
-        jobsAppliedList = list(jobsApplied.split(" "))
+            finalAppli = appliString.join(appliList)
+            print(finalAppli)
 
-        jobsAppliedList.append(jobPostID)
+            postedJobData.appliedPeople = finalAppli
+            postedJobData.save()
 
-        userAppliString = " "
+            # Saving Data for appliedJobsTo in User Model
 
-        FinaluserApplJob = userAppliString.join(jobsAppliedList)
-        print(FinaluserApplJob)
+            jobsApplied = currUserID.appliedJobsTo
+            jobsAppliedList = list(jobsApplied.split(" "))
 
-        currUserID.appliedJobsTo = FinaluserApplJob
-        currUserID.save()
+            jobsAppliedList.append(jobPostID)
 
-        return JsonResponse({
-            'success': True,
-            'user applied': currUser})
+            userAppliString = " "
+
+            FinaluserApplJob = userAppliString.join(jobsAppliedList)
+            print(FinaluserApplJob)
+
+            currUserID.appliedJobsTo = FinaluserApplJob
+            currUserID.save()
+
+            return JsonResponse({
+                'success': True,
+                'user applied': currUser})
 
 
 @csrf_exempt
@@ -424,7 +438,7 @@ def cancelJob(request, jobPostID):
 
 
 @csrf_exempt
-def updateData(request):  # Under Construction
+def updateData(request):
     if request.method == 'POST':
         upData = json.loads(request.body)
 
