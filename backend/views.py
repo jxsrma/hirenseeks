@@ -251,14 +251,23 @@ def jobPostedBy(request):
     jobsPostedBy = postedJob.objects.filter(postedBy=currUser)
     jobsList = []
     for jobs in jobsPostedBy:
-        appPeople = list(jobs.appliedPeople.split(" "))
+        
+        userID = jobs.appliedPeople
         userNameOfApplicants = []
-        for appUser in appPeople:
-            try:
-                appData = User.objects.get(id=appUser)
-                userNameOfApplicants.append(appData.userName)
-            except:
-                print('Null User ID')
+        
+        if len(userID) == 0:
+            userNameOfApplicants.append("None")
+            
+        else:
+            
+            appPeople = list(userID.split(" "))
+            
+            for appUser in appPeople:
+                try:
+                    appData = User.objects.get(id=appUser)
+                    userNameOfApplicants.append(appData.userName)
+                except:
+                    print('Null User ID')
 
         jobObjDict = {
             'title': jobs.title,
