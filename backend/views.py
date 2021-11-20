@@ -286,8 +286,8 @@ def jobPostedBy(request):
             'expLevel': jobs.expLevel,
             'location': jobs.location,
             'timing': jobs.timing,
-            'appliedPeople': userNameOfApplicants
-
+            'jobDate': jobs.jobDate,
+            'appliedPeople': userNameOfApplicants,
         }
         jobsList.append(jobObjDict)
     return JsonResponse({"Jobs": jobsList})
@@ -378,7 +378,8 @@ def userAppliedJobs(request):
                     'reqSkill': jobData.reqSkill,
                     'expLevel': jobData.expLevel,
                     'location': jobData.location,
-                    'timing': jobData.timing
+                    'timing': jobData.timing,
+                    'jobDate': jobData.jobDate
                 }
 
                 jobsAppliedList.append(jobObjDict)
