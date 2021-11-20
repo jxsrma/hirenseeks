@@ -11,6 +11,7 @@ urlpatterns = [
     path('update', views.updateData,name='updateData'),
     path('jobs', views.jobs,name='jobs'),
     path('job-posted', views.jobPostedBy,name='jobs'),
+    path('job/<jobPostID>', views.job,name='job'),
     path('apply/<jobPostID>', views.apply,name='applyJob'),
     path('cancelJob/<jobPostID>', views.cancelJob,name='cancelJob'),
     path('<userID>', views.userProfile, name='userprofile'),

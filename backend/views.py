@@ -278,6 +278,7 @@ def jobPostedBy(request):
                     print('Null User ID')
 
         jobObjDict = {
+            'id' : jobs.id,
             'title': jobs.title,
             'jobPos': jobs.jobPos,
             'desc': jobs.desc,
@@ -348,7 +349,6 @@ def apply(request, jobPostID):
                 'success': True,
                 'user applied': currUser})
 
-
 @csrf_exempt
 def userAppliedJobs(request):
     currUser = request.session.get('user')
@@ -371,6 +371,7 @@ def userAppliedJobs(request):
                 jobData = postedJob.objects.get(id=jobsApplied)
 
                 jobObjDict = {
+                    'id' : jobData.id,
                     'title': jobData.title,
                     'jobPos': jobData.jobPos,
                     'desc': jobData.desc,
@@ -519,3 +520,23 @@ def updateData(request):
 def jobs(request):
     joblist = list(postedJob.objects.values())
     return JsonResponse(joblist, safe=False)
+
+
+
+
+@csrf_exempt
+def job(request, jobPostID):
+    job = postedJob.objects.get(id=jobPostID)
+    return JsonResponse({
+        "id" : job.id,
+        "jobDate" : job.jobDate,
+        "title" : job.title,
+        "jobPos" : job.jobPos,
+        "desc" : job.desc,
+        "timing" : job.timing,
+        "reqSkill" : job.reqSkill,
+        "expLevel" : job.expLevel,
+        "postedBy" : job.postedBy,
+        "location" : job.location,
+        "appliedPeople" : job.appliedPeople
+    }, safe=False)
