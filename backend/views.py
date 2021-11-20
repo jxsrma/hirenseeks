@@ -526,17 +526,27 @@ def jobs(request):
 
 @csrf_exempt
 def job(request, jobPostID):
-    job = postedJob.objects.get(id=jobPostID)
-    return JsonResponse({
-        "id" : job.id,
-        "jobDate" : job.jobDate,
-        "title" : job.title,
-        "jobPos" : job.jobPos,
-        "desc" : job.desc,
-        "timing" : job.timing,
-        "reqSkill" : job.reqSkill,
-        "expLevel" : job.expLevel,
-        "postedBy" : job.postedBy,
-        "location" : job.location,
-        "appliedPeople" : job.appliedPeople
-    }, safe=False)
+    try:
+        job = postedJob.objects.get(id=jobPostID)    
+        return JsonResponse({
+            "success" : True,
+            "data" : {
+                "id" : job.id,
+                "jobDate" : job.jobDate,
+                "title" : job.title,
+                "jobPos" : job.jobPos,
+                "desc" : job.desc,
+                "timing" : job.timing,
+                "reqSkill" : job.reqSkill,
+                "expLevel" : job.expLevel,
+                "postedBy" : job.postedBy,
+                "location" : job.location,
+                "appliedPeople" : job.appliedPeople
+            }
+        })
+    except:
+        return JsonResponse({
+            "success" : False,
+            "error" : "Invalid Job Id"
+        })
+        
