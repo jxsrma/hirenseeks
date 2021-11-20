@@ -284,6 +284,7 @@ def jobPostedBy(request):
             'reqSkill': jobs.reqSkill,
             'expLevel': jobs.expLevel,
             'location': jobs.location,
+            'timing': jobs.timing,
             'appliedPeople': userNameOfApplicants
 
         }
@@ -376,6 +377,7 @@ def userAppliedJobs(request):
                     'reqSkill': jobData.reqSkill,
                     'expLevel': jobData.expLevel,
                     'location': jobData.location,
+                    'timing': jobData.timing
                 }
 
                 jobsAppliedList.append(jobObjDict)
